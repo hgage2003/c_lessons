@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 void read_input(int *t, int *p)
 {
@@ -6,23 +7,23 @@ void read_input(int *t, int *p)
     ninput = scanf("%d%d", t, p);
     if ((ninput != 2) || (p == 0) || (t == 0))
     {
-        pfintf("error: wrong input\n");
+        printf("error: wrong input\n");
         abort();
     }
 }
 
 int fs_rec(int num, int f, int fp, int *turn)
 {
-    if (num > (f + fp))
+    if (num >= (f + fp))
     {
-        num = fs_rec(num, f + fp, f);
+        num = fs_rec(num, f + fp, f, turn);
     }
     
     if (num < f)
         return num;
 
     if (num == f)
-        turn = f;
+        *turn = f;
 
     return num - f;
 }
@@ -30,6 +31,10 @@ int fs_rec(int num, int f, int fp, int *turn)
 int next_turn(int total, int possible)
 {
     int turn = 0;
+
+    if (possible >= total)
+        return total;
+
     fs_rec(total, 1, 1, &turn);
 
     if (turn > possible)

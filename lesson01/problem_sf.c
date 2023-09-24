@@ -3,7 +3,7 @@
 
 int fs_rec(int num, int f, int fp)
 {
-    if (num > (f + fp))
+    if (num >= (f + fp))
     {
         num = fs_rec(num, f + fp, f);
     }
