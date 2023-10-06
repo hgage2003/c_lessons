@@ -29,9 +29,8 @@ unsigned gcd(unsigned long long a, unsigned long long b)
 int main()
 {
     unsigned n;
-    unsigned long long res;
+    unsigned long long res = 2;
     read_input(&n);
-    res = 2;
 
     for (int i = 3; i <= n; ++i)
     {
