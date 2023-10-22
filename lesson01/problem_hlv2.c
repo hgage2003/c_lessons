@@ -4,7 +4,7 @@
 const int ARRAY_SIZE = 6;
 
 int next_permutation(int*);
-int solution(int*);
+int is_solution(int*);
 int is_minimal(int*);
 void print_res(int*);
 
@@ -17,7 +17,7 @@ int main()
 
     do
     {
-        if (solution(arr))
+        if (is_solution(arr))
             if (is_minimal(arr))
                 print_res(arr);
     }
@@ -56,7 +56,7 @@ int next_permutation(int* arr)
     return 1;
 }
 
-int solution(int* arr)
+int is_solution(int* arr)
 {
     int sum;
     assert(ARRAY_SIZE == 6);
