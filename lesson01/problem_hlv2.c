@@ -28,6 +28,7 @@ void swap(int* arr, int i, int j)
 {
     int t;
     assert((i < ARRAY_SIZE) && (j < ARRAY_SIZE));
+    assert((i >= 0) && (j >= 0));
 
     t = arr[i]; 
     arr[i] = arr[j];
