@@ -51,10 +51,9 @@ unsigned long long sieve_bound(unsigned num)
 	return (unsigned long long) round(dres);
 }
 
-unsigned long long nth_prime(struct sieve_t *sv, unsigned N)
+unsigned nth_prime(struct sieve_t *sv, unsigned N)
 {
 	unsigned res = 0, counter = 2; // 2 and 3
-
 	assert(N > 0);
 
     if (N == 1)
@@ -148,8 +147,7 @@ void fill_sieve(struct sieve_t *sv)
 
 int main()
 {
-	unsigned num;
-	unsigned bound, res = 0;
+	unsigned num, bound, res = 0;
 	struct sieve_t s;
 	
 	read_input(&num);
@@ -159,7 +157,7 @@ int main()
 	else
 		bound = 100;
 
-	s = init_sieve(bound / (CHAR_BIT * 6));
+	s = init_sieve(bound / (CHAR_BIT * 6) + 1);
 
 	res = nth_prime(&s, num);
 
