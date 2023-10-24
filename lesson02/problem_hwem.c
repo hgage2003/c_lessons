@@ -32,9 +32,9 @@ unsigned long long nth_prime(struct sieve_t *sv, unsigned N)
     }
 }
 
-void read_input(unsigned *n)
+void read_input(unsigned long long *n)
 {
-	int ninput = scanf("%ud", n);
+	int ninput = scanf("%llu", n);
 	if (ninput != 1 || (*n < 1))
 	{
 		printf("Error: wrong input\n");
@@ -44,7 +44,7 @@ void read_input(unsigned *n)
 
 int main()
 {
-	unsigned num;
+	unsigned long long num;
 	unsigned long long bound, res;
 	struct sieve_t s;
 	struct timespec tm1, tm2;

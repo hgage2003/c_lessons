@@ -95,7 +95,7 @@ void free_sieve(struct sieve_t *sv)
     sv->n = 0;
 }
 
-unsigned long long sieve_bound(unsigned num)
+unsigned long long sieve_bound(unsigned long long num)
 {
 	double dnum = num, dres;
     
