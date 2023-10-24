@@ -1,15 +1,9 @@
-#pragma once
+#include "bit_sieve.h"
 
 #include <malloc.h>
 #include <limits.h>     // CHAR_BIT
 #include <math.h>       // log()
 #include <stdlib.h>     // abort()
-
-struct sieve_t {
-  unsigned long long n;
-  unsigned char *mod1;
-  unsigned char *mod5;  
-};
 
 int is_prime(struct sieve_t *sv, unsigned long long n)
 {

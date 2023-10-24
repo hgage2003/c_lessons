@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>		// SIZE_MAX
+#include <limits.h>		// CHAR_BIT
 #include "bit_sieve.h"
 #include "simple-bench.h"
 
