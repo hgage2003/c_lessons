@@ -2,7 +2,7 @@
 
 #include <malloc.h>
 #include <limits.h>     // CHAR_BIT
-#include <math.h>       // log()
+#include <math.h>       // log(), round()
 #include <stdlib.h>     // abort()
 
 int is_prime(struct sieve_t *sv, unsigned long long n)
