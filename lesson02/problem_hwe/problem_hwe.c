@@ -44,8 +44,7 @@ void read_input(unsigned long long *n)
 
 int main()
 {
-	unsigned long long num;
-	unsigned long long bound, res;
+	unsigned long long num, bound, res;
 	struct sieve_t s;
 	struct timespec tm1, tm2;
 
