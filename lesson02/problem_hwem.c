@@ -5,9 +5,9 @@
 #include "bit_sieve.h"
 #include "simple-bench.h"
 
-unsigned long long nth_prime(struct sieve_t *sv, unsigned N)
+unsigned long long nth_prime(struct sieve_t *sv, unsigned long long N)
 {
-	unsigned counter = 2; // 2 and 3
+	unsigned long long counter = 2; // 2 and 3
 	unsigned long long res = 0;
 
 	assert(N > 0);
