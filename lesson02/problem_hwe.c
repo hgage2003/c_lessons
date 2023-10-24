@@ -78,7 +78,7 @@ unsigned nth_prime(struct sieve_t *sv, unsigned N)
 
 void read_input(unsigned *n)
 {
-	int ninput = scanf("%ud", n);
+	int ninput = scanf("%u", n);
 	if (ninput != 1 || (*n < 1))
 	{
 		printf("Error: wrong input\n");
