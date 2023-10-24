@@ -91,11 +91,11 @@ void free_sieve(struct sieve_t *sv)
 
 unsigned long long sieve_bound(unsigned long long num)
 {
-	double dnum = num, dres;
-    
+    double dnum = num, dres;
+
     if (num < 20)
         return 100;
         
-	dres = dnum * (log(dnum) + log(log(dnum)));
-	return (unsigned long long) round(dres);
+    dres = dnum * (log(dnum) + log(log(dnum)));
+    return (unsigned long long) round(dres);
 }

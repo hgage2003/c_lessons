@@ -12,24 +12,24 @@ unsigned long long nth_prime(struct sieve_t *sv, unsigned long long N)
 
 	assert(N > 0);
 
-    if (N == 1)
-        return 2;
+	if (N == 1)
+		return 2;
 
-    if (N == 2)
-        return 3;
+	if (N == 2)
+		return 3;
 
 	for (;;)
-    {
+	{
 		counter += is_prime(sv, res + 1);
-        if (counter >= N)
-            return (res + 1);
-            
-        counter += is_prime(sv, res + 5);
-        if (counter >= N)
-            return (res + 5);
-
-        res += 6;
-    }
+		if (counter >= N)
+			return (res + 1);
+			
+		counter += is_prime(sv, res + 5);
+		if (counter >= N)
+			return (res + 5);
+		
+		res += 6;
+	}
 }
 
 void read_input(unsigned long long *n)
@@ -48,7 +48,7 @@ int main()
 	unsigned long long bound, res;
 	struct sieve_t s;
 	struct timespec tm1, tm2;
-	
+
 	read_input(&num);
 	bound = sieve_bound(num);
 
