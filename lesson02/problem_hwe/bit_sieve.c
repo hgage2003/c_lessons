@@ -5,6 +5,12 @@
 #include <math.h>       // log(), round()
 #include <stdlib.h>     // abort()
 
+struct sieve_t {
+  unsigned long long n;
+  unsigned char *mod1;
+  unsigned char *mod5;  
+};
+
 int is_prime(struct sieve_t *sv, unsigned long long n)
 {
     // mod определяет в каком массиве бит, div - номер бита 
@@ -47,7 +53,7 @@ void set_not_prime(struct sieve_t *sv, unsigned long long n)
 void fill_sieve(struct sieve_t *sv)
 {
     unsigned long long sieve_max = sv->n * CHAR_BIT * 6;
-    sv->mod1[0] = (unsigned char)1; // 1 - составное
+    sv->mod1[0] = 1; // 1 - составное
     
     for (unsigned long long i = 0; (i * i) < sieve_max; i += 6)
     {
@@ -61,20 +67,35 @@ void fill_sieve(struct sieve_t *sv)
     }
 }
 
-struct sieve_t init_sieve(unsigned long long size_bytes)
+struct sieve_t* init_sieve(unsigned long long size_bytes)
 {
-    struct sieve_t sv;
-    sv.mod1 = calloc(size_bytes, sizeof(unsigned char));
-    sv.mod5 = calloc(size_bytes, sizeof(unsigned char));
-
-    if ((sv.mod1  == 0) || (sv.mod5  == 0))
+    struct sieve_t *sv = calloc(1, sizeof(struct sieve_t));
+    if (!sv)
     {
         printf("Error: calloc error\n");
         abort();
     }
-    sv.n = size_bytes;
+
+    sv->mod1 = calloc(size_bytes, sizeof(unsigned char));
+    if (!sv->mod1)
+    {
+        printf("Error: calloc error\n");
+        free(sv);
+        abort();
+    }
+
+    sv->mod5 = calloc(size_bytes, sizeof(unsigned char));
+    if (!sv->mod5)
+    {
+        printf("Error: calloc error\n");
+        free(sv->mod1);
+        free(sv);
+        abort();
+    }
+
+    sv->n = size_bytes;
     
-    fill_sieve(&sv);
+    fill_sieve(sv);
 
     return sv;
 }
@@ -86,7 +107,8 @@ void free_sieve(struct sieve_t *sv)
 
     free(sv->mod1);
     free(sv->mod5);
-    sv->n = 0;
+    free(sv);
+    sv = 0;
 }
 
 unsigned long long sieve_bound(unsigned long long num)

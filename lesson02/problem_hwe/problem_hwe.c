@@ -45,7 +45,7 @@ void read_input(unsigned long long *n)
 int main()
 {
 	unsigned long long num, bound, res;
-	struct sieve_t s;
+	struct sieve_t* s;
 	struct timespec tm1, tm2;
 
 	read_input(&num);
@@ -54,11 +54,11 @@ int main()
 	simple_gettime(&tm1);
 	s = init_sieve(bound / (CHAR_BIT * 6) + 1);
 	simple_gettime(&tm2);
-	printf("time to build sieve: %f\n", diff(tm1, tm2));
+	#if 0
+		printf("time to build sieve: %f\n", diff(tm1, tm2));
+	#endif
 
-	res = nth_prime(&s, num);
-
-	free_sieve(&s);
-
+	res = nth_prime(s, num);
+	free_sieve(s);
 	printf("%llu\n", res);
 }
