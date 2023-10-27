@@ -44,7 +44,7 @@ int main()
     int *array;
     read_input(&N);
 
-    array = (int*)malloc(2 * N * sizeof(int));
+    array = malloc(2 * N * sizeof(int));
 
     for (int i = 0; i < 2 * N; ++i)
         array[i] = i + 1;
