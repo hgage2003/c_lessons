@@ -31,12 +31,12 @@ void print_res(int*);
 void read_input(int *n)
 {
     int ninput;
-	ninput = scanf("%d", n);
-	if ((ninput != 1) || (*n < 3))
-	{
-		printf("error: wrong input\n");
-		abort();
-	}
+    ninput = scanf("%d", n);
+    if ((ninput != 1) || (*n < 3))
+    {
+        printf("error: wrong input\n");
+        abort();
+}
 }
 
 int main()
