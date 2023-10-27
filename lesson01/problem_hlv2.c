@@ -36,7 +36,7 @@ void read_input(int *n)
     {
         printf("error: wrong input\n");
         abort();
-}
+    }
 }
 
 int main()
