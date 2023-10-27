@@ -1,33 +1,68 @@
 #include <stdio.h>
+#include <stdlib.h>     // abort()
 #include <assert.h>
+#include <malloc.h>
 
-const int ARRAY_SIZE = 6;
+/*
+Магические тройки
+
+Задается N - количество точек внутренней фигуры.
+Всего в сетке 2*N ячеек, которые хранятся в одномерном массиве.
+
+Ячейки массива располагаются по сетке следующим образом:
+Сначала внешние "хвосты" по часовой стрелке, потом внутренняя фигура.
+Треугольная сетка будет иметь тройки ячеек с номерами {1,4,5}, {2,5,6} и {3,6,4}.
+
+Подходящие тройки находятся перебором всех перестановок по порядку 
+с проверкой равенства троек.
+
+Функция next_permutation выдает следующую перестановку по возрастанию.
+Из массива [1,2,3,4,5,6] в конце концов придет к [6,5,4,3,2,1] 
+*/
+
+int N;
 
 int next_permutation(int*);
 int is_solution(int*);
 int is_minimal(int*);
 void print_res(int*);
 
+void read_input(int *n)
+{
+    int ninput;
+	ninput = scanf("%d", n);
+	if ((ninput != 1) || (*n < 3))
+	{
+		printf("error: wrong input\n");
+		abort();
+	}
+}
+
 int main()
 {
-    int arr[ARRAY_SIZE];
+    int *array;
+    read_input(&N);
 
-    for (int i = 0; i < ARRAY_SIZE; ++i)
-        arr[i] = i + 1;
+    array = (int*)malloc(2 * N * sizeof(int));
+
+    for (int i = 0; i < 2 * N; ++i)
+        array[i] = i + 1;
 
     do
     {
-        if (is_solution(arr))
-            if (is_minimal(arr))
-                print_res(arr);
+        if (is_solution(array))
+            if (is_minimal(array))
+                print_res(array);
     }
-    while (next_permutation(arr));
+    while (next_permutation(array));
+
+    free(array);
 }
 
 void swap(int* arr, int i, int j)
 {
     int t;
-    assert((i < ARRAY_SIZE) && (j < ARRAY_SIZE));
+    assert((i < (2 * N)) && (j < (2 * N)));
     assert((i >= 0) && (j >= 0));
 
     t = arr[i]; 
@@ -37,7 +72,7 @@ void swap(int* arr, int i, int j)
 
 int next_permutation(int* arr)
 {
-    int j = ARRAY_SIZE - 2, k = ARRAY_SIZE - 1, l, r;
+    int j = 2 * N - 2, k = 2 * N - 1, l, r;
 
     while ((j != -1) && (arr[j] >= arr[j + 1]))
         --j;
@@ -50,7 +85,7 @@ int next_permutation(int* arr)
     
     swap(arr, j, k);
 
-    l = j + 1; r = ARRAY_SIZE - 1;
+    l = j + 1; r = 2 * N - 1;
     while (l < r)
         swap(arr, l++, r--);
 
@@ -60,30 +95,30 @@ int next_permutation(int* arr)
 int is_solution(int* arr)
 {
     int sum;
-    assert(ARRAY_SIZE == 6);
+    assert(N >= 3);
 
-    sum = arr[0] + arr[1] + arr[5];
-    if (sum != (arr[1] + arr[2] + arr[3]))
-        return 0;
-    if (sum != (arr[2] + arr[0] + arr[4]))
-        return 0;
+    sum = arr[N - 1] + arr[2 * N - 1] + arr[N];
+
+    for (int i = 0; i < N - 1; ++i)
+        if ((arr[i] + arr[N + i] + arr[N + i + 1]) != sum)
+            return 0;
 
     return 1;
 }
 
 int is_minimal(int* arr)
 {   
-    assert(ARRAY_SIZE == 6);
-    if ((arr[3] < arr[5]) && (arr[3] < arr[4]))
-        return 1;
+    for (int i = 1; i < N; ++i)
+        if (arr[i] < arr[0])
+            return 0;
 
-    return 0;
+    return 1;
 }
 
 void print_res(int* arr)
 {
-    assert(ARRAY_SIZE == 6);
-    printf("%d,%d,%d; %d,%d,%d; %d,%d,%d\n",    arr[3], arr[2], arr[1],
-                                                arr[5], arr[1], arr[0],
-                                                arr[4], arr[0], arr[2]);
+    for (int i = 0; i < N - 1; ++i)
+        printf("%d,%d,%d; ", arr[i], arr[N + i], arr[N + i + 1]);
+
+    printf("%d,%d,%d\n", arr[N - 1], arr[2 * N - 1], arr[N]);
 }
