@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>     // abort()
 #include <assert.h>
 
 struct array_int
