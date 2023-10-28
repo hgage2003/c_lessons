@@ -1,12 +1,25 @@
 #include <stdio.h>
-#include <stdlib.h>     // abort()
-#include <malloc.h>
+#include <stdlib.h>
+#include <assert.h>
 
 struct array_int
 {
     int* data;
     unsigned size;
 };
+
+void swap(struct array_int* arr, unsigned i, unsigned j)
+{
+    int t;
+    assert(arr != NULL);
+
+    if ((i < arr->size) && (j < arr->size) && (i != j))
+    {
+        t = arr->data[i];
+        arr->data[i] = arr->data[j];
+        arr->data[j] = t;
+    }
+}
 
 struct array_int* read_input()
 {
@@ -52,27 +65,33 @@ struct array_int* read_input()
     return res;
 }
 
+int myrand() 
+{
+    static unsigned long int seed = 1;
+    seed = seed * 1103515245 + 12345;
+    return (unsigned int)(seed / 65536) % 32768;
+}
+
 int main()
 {
-    struct array_int *arr = NULL;
-    int min, max;
-
+    struct array_int* arr;
+    
     arr = read_input();
+
     if (arr->size == 0)
-        min = max = 0;
+        printf("0\n");
     else
-        min = max = arr->data[0];
-
-    for (int i = 0; i < arr->size; ++i)
     {
-        if (arr->data[i] < min)
-            min = arr->data[i];
+        for (int i = arr->size - 1; i > 0; --i)
+        {
+            int pos = myrand() % (i + 1);
+            swap(arr, pos, i);
+        }
 
-        if (arr->data[i] > max)
-            max = arr->data[i];
+        for (int i = 0; i < arr->size; ++i)
+            printf((i < arr->size - 1) ? "%d " : "%d\n", arr->data[i]);
     }
 
     free(arr->data);
     free(arr);
-    printf("%d %d\n", min, max);
 }
