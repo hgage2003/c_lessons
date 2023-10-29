@@ -50,8 +50,8 @@ static void set_not_prime(struct sieve_t *sv, unsigned long long n)
         sv->mod5[byte] |= (1 << bit);
 }
 
-// check every number N in mod1, mod5
-// if N prime, iterate from 5N and 7N every 6N
+// проверка каждого N из mod1, mod5
+// если N простое, заполнение решета от 5N и 7N с шагом 6N
 static void fill_sieve(struct sieve_t *sv)
 {
     unsigned long long sieve_max = sv->n * CHAR_BIT * 6;
