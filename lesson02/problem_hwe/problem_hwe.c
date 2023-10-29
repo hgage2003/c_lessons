@@ -54,7 +54,7 @@ int main()
 	simple_gettime(&tm1);
 	s = init_sieve(bound / (CHAR_BIT * 6) + 1);
 	simple_gettime(&tm2);
-	#if 0
+	#if 1
 		printf("time to build sieve: %f\n", diff(tm1, tm2));
 	#endif
 

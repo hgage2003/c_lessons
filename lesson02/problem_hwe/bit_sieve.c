@@ -4,6 +4,7 @@
 #include <limits.h>     // CHAR_BIT
 #include <math.h>       // log(), round()
 #include <stdlib.h>     // abort()
+#include <assert.h>
 
 struct sieve_t {
   unsigned long long n;
@@ -34,13 +35,12 @@ int is_prime(struct sieve_t *sv, unsigned long long n)
     return prime;   
 }
 
-void set_not_prime(struct sieve_t *sv, unsigned long long n)
+static void set_not_prime(struct sieve_t *sv, unsigned long long n)
 {
     unsigned long long mod = n % 6, div = n / 6;
     unsigned long long byte, bit;
 
-    if ((mod != 1) && (mod != 5))
-        return;
+    assert ((mod == 1) || (mod == 5));
 
     byte = div / CHAR_BIT; bit = div % CHAR_BIT;
 
@@ -50,20 +50,25 @@ void set_not_prime(struct sieve_t *sv, unsigned long long n)
         sv->mod5[byte] |= (1 << bit);
 }
 
-void fill_sieve(struct sieve_t *sv)
+// check every number N in mod1, mod5
+// if N prime, iterate from 5N and 7N every 6N
+static void fill_sieve(struct sieve_t *sv)
 {
     unsigned long long sieve_max = sv->n * CHAR_BIT * 6;
     sv->mod1[0] = 1; // 1 - составное
     
     for (unsigned long long i = 0; (i * i) < sieve_max; i += 6)
     {
-        if (is_prime(sv, i + 1))
-            for (unsigned long long j = (i + 1) * 2; j < sieve_max; j += (i + 1))
-                set_not_prime(sv, j);
-
-        if (is_prime(sv, i + 5))
-            for (unsigned long long j = (i + 5) * 2; j < sieve_max; j += (i + 5))
-                set_not_prime(sv, j);
+        unsigned long long num[2] = {i + 1, i + 5};
+        for (int i = 0; i < 2; ++i)
+            if (is_prime(sv, num[i]))
+            {
+                unsigned long long step = num[i] * 6;
+                unsigned long long it[2] = {num[i] * 5, num[i] * 7};
+                for (int j = 0; j < 2; ++j)
+                    for (; it[j] < sieve_max; it[j] += step)
+                        set_not_prime(sv, it[j]);
+            }
     }
 }
 
