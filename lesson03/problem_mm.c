@@ -20,6 +20,7 @@ struct array_int* read_input()
     if (ninput != 1)
     {
         printf("Error: wrong input\n");
+        free(res);
         abort();
     }
 
