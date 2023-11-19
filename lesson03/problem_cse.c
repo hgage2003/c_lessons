@@ -89,7 +89,6 @@ struct array_int read_input()
 int main()
 {
     struct array_int arr;
-    int pos, minpos;
 
     arr = read_input();
 
