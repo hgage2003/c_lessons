@@ -1,9 +1,7 @@
-
 #ifdef NDEBUG
 
 #include <stdio.h>
 #include <malloc.h>
-#include <stdlib.h>
 
 void merge(int *arr, int l, int m, int r);
 
@@ -33,6 +31,8 @@ int main()
         printf( (i < arr_size - 1) ? "%d " : "%d\n", arr[i]);
 }
 #endif
+
+#include <stdlib.h>
 
 void merge(int *arr, int l, int m, int r)
 {
