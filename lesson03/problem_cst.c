@@ -47,6 +47,13 @@ struct array_int fill_buckets(struct array_int array)
     
     // alloc and initialize buckets with 0
     bckt.data = calloc(bckt.size, sizeof(int));
+    if (bckt.data == NULL)
+    {
+        printf("Error in calloc\n");
+        free(array.data);
+        abort();
+    }
+
     for (int i = 0; i < array.size; ++i)
         ++bckt.data[array.data[i]];
 

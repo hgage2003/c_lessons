@@ -43,19 +43,28 @@ struct array_int read_input(int *digit)
     return arr;
 }
 
-void radix_sort(struct array_int arr, int digit)
+int get_digit(int value, int pos)
 {
-    int a[10] = {0}, b[10] = {0};
     int expn = 1;
-    int sum = 0, temp = 0;
-    int *temp_arr;
     
-    while (digit-- > 0)
+    while (pos-- > 0)
         expn *= 10;
 
+    return (value / expn) % 10;
+}
+
+void radix_sort(struct array_int arr, int digit)
+{
+    int b[10] = {0};
+    int sum = 0, d, temp;
+    int *temp_arr;
+    
     // fill 10 buckets
     for (int i = 0; i < arr.size; ++i)
-        ++b[(arr.data[i] / expn) % 10];
+    {
+        d = get_digit(arr.data[i], digit);
+        ++b[d];
+    }
 
     // change counters in buckets to start positions
     for (int i = 0; i < 10; ++i)
@@ -66,8 +75,19 @@ void radix_sort(struct array_int arr, int digit)
     }
 
     temp_arr = calloc(arr.size, sizeof(int));
+    if (temp_arr == NULL)
+    {
+        printf("Error in calloc\n");
+        free(arr.data);
+        abort();
+    }
+
     for (int i = 0; i < arr.size; ++i)
-        temp_arr[b[(arr.data[i] / expn) % 10]++] = arr.data[i];
+    {
+        d = get_digit(arr.data[i], digit);
+        temp_arr[b[d]] = arr.data[i];
+        ++b[d];
+    }
 
     for (int i = 0; i < arr.size; ++i)
         arr.data[i] = temp_arr[i];
