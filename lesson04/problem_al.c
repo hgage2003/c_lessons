@@ -68,6 +68,7 @@ struct node_t *read_list(FILE *inp)
     return list;
 }
 
+#ifdef NDEBUG 
 // удаляет список элемент за элементом
 void delete_list(struct node_t *top)
 {
@@ -79,8 +80,6 @@ void delete_list(struct node_t *top)
         top = temp;
     }
 }
-
-#ifdef NDEBUG 
 
 void print_list(const struct node_t *top)
 {
