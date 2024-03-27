@@ -1,2 +1,3 @@
 *.out
 *.o
+lesson04/utils.c
