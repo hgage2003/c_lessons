@@ -44,13 +44,13 @@ void print_pre(struct tree_t *top)
     print_pre(top->right);
 }
 
-void free_pre(struct tree_t *top)
+void free_tree(struct tree_t *top)
 {
     if (!top)
         return;
 
-    free_pre(top->left);
-    free_pre(top->right);
+    free_tree(top->left);
+    free_tree(top->right);
 
     free(top);
 }
@@ -98,7 +98,7 @@ struct tree_t *read_input()
         if (res != 1)
         {
             fprintf(stderr, "Format error: node\n");
-            free_pre(top);
+            free_tree(top);
             return NULL;
         }
 
@@ -115,5 +115,5 @@ int main()
     top = read_input();
 
     print_pre(top);
-    free_pre(top);
+    free_tree(top);
 }

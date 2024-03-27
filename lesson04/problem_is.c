@@ -77,13 +77,13 @@ int check_is_bst(struct tree_t *top)
 }
 
 #ifdef NDEBUG
-void free_pre(struct tree_t *top)
+void free_tree(struct tree_t *top)
 {
     if (!top)
         return;
 
-    free_pre(top->left);
-    free_pre(top->right);
+    free_tree(top->left);
+    free_tree(top->right);
 
     free(top);
 }
@@ -125,6 +125,6 @@ int main()
     top->right->left->right = tmp;
 
     printf("%d\n", check_is_bst(top));
-    free_pre(top);
+    free_tree(top);
 }
 #endif
