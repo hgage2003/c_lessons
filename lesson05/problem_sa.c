@@ -41,7 +41,7 @@ char *strcat_r(char *dest, const char *src, int *bufsz)
         return strcat(dest, src);
     }
     
-    res = (char*)realloc(dest, res_len + 1);
+    res = (char*)realloc(dest, (res_len + 1) * sizeof(char));
     if (res)
         strcat(res, src);
     

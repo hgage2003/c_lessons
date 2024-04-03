@@ -28,25 +28,19 @@ Problem SCN — суммирование в строке
 
 #include <stdio.h>
 
-int read_input(char* str)
-{
-    int i = 0, sum = 0;
-    for( ; ; ++i)
+int main()
+ {
+    int sum = 0;
+    char c;
+
+    for( ; ; )
     {
-        int res = scanf("%c", &str[i]);
-        if ((res != 1) || (str[i] == 0))
+        int res = scanf("%c", &c);
+        if ((res != 1) || (c == 0))
             break;
 
-        sum += str[i];
+        sum += c;
     }
 
-    return sum;
-}
-
- int main()
- {
-    char str[1024];
-    int res = read_input(str);
-
-    printf("%d\n", res);
+    printf("%d\n", sum);
  }
