@@ -154,7 +154,7 @@ int main()
     if (res) 
     {
         regerror(res, &regex, BUFFER, sizeof(BUFFER));
-        fprintf(stderr, "Regex match failed: %s\n", BUFFER);
+        fprintf(stderr, "Regex compilation failed: %s\n", BUFFER);
 
         free(regstr);
         free(str);
