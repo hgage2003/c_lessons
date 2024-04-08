@@ -23,7 +23,6 @@ Problem ED — расстояние редактирования
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <string.h>
 
 int read_string(char **str)
@@ -82,89 +81,103 @@ int min(int a, int b, int c)
     return res < c ? res : c;
 }
 
-int calc_cost(int fi, int ti, int costs[3], const char *from, const char *to, int **V)
+int alloc_matrix(int ***M, int h, int w)
 {
-    int add, del, change;
-
-    if ((fi < 0) || (ti < 0))
-        return INT_MAX;
-
-    if (fi == 0)
-    {
-        V[fi][ti] = ti * costs[0]; // добавить ti раз по букве 
-        return V[fi][ti];
-    }
-    if (ti == 0)
-    {
-        V[fi][ti] = fi * costs[1]; // удалить fi раз по букве
-        return V[fi][ti];
-    }
-
-    if (V[fi][ti] != INT_MAX)
-        return V[fi][ti];
-   
-    add = calc_cost(fi - 1, ti, costs, from, to, V) + costs[0];
-    del = calc_cost(fi, ti - 1, costs, from, to, V) + costs[1];
-    change = calc_cost(fi - 1, ti - 1, costs, from, to, V);
-    
-    if (from[fi - 1] != to[ti - 1])
-        change += costs[2];
-
-    V[fi][ti] = min(add, del, change);
-
-    return V[fi][ti];
-}
-
-int main()
-{
-    char *from, *to;
-    int costs[3], res, **V;
-
-    read_input(costs, &from, &to);
-
-    V = calloc(strlen(from) + 1, sizeof(char*));
-    if (!V)
+    *M = calloc(h, sizeof(int*));
+    if (!(*M))
     {
         fprintf(stderr, "Error in calloc\n");
-        free(from);
-        free(to);
         return 1;
     }
 
-    for (int i = 0; i <= strlen(from); ++i)
+    for (int i = 0; i < h; ++i)
     {
-        V[i] = calloc(strlen(to) + 1, sizeof(int));
-        if (!V[i])
+        (*M)[i] = calloc(w, sizeof(int));
+        if (!(*M)[i])
         {
             fprintf(stderr, "Error in calloc\n");
             
             for (int j = i - 1; j >= 0; --j)
-                free(V[j]);
+                free((*M)[j]);
             
-            free(V);
-            free(from);
-            free(to);
+            free(*M);
             return 1;
         }
-
-        for (int j = 1; j <= strlen(to); ++j)
-            V[i][j] = INT_MAX;
     }
 
-    res = calc_cost(strlen(from), strlen(to), costs, from, to, V);
+    return 0;
+}
+
+void free_matrix(int **M, int h)
+{
+    for (int i = 0; i < h; ++i)
+        free(M[i]);
+
+    free(M);
+}
+
+void fill_matrix(int costs[3], const char *from, const char *to, int **V)
+{
+    int add, del, change;
+    for (int i = 0; i <= strlen(from); ++i)
+        for (int j = 0; j <= strlen(to); ++j)
+        {
+            if (!i)
+            {
+                V[i][j] = j * costs[0];
+                continue;
+            }
+            if (!j)
+            {
+                V[i][j] = i * costs[1];
+                continue;
+            }
+
+            add = V[i - 1][j] + costs[0];
+            del = V[i][j - 1] + costs[1];
+            change = V[i - 1][j - 1];
+            
+            if (from[i - 1] != to[j - 1])
+                change += costs[2];
+
+            V[i][j] = min(add, del, change);
+        }
+}
+
+int main()
+{
+    int costs[3], res, **V;
+    char *from, *to;
+    int flen, tlen;
+
+    read_input(costs, &from, &to);
+    flen = strlen(from);
+    tlen = strlen(to);
+
+    if (alloc_matrix(&V, flen + 1, tlen + 1))
+    {
+        fprintf(stderr, "Error in calloc\n");
+        free(from);
+        free(to);
+        abort();
+    }
+
+    fill_matrix(costs, from, to, V);
+    res = V[flen][tlen];
     printf("%d\n", res);
 
-    for (int i = 0; i <= strlen(from); ++i)
-    {
 #if 0
-        for (int j = 0; j <= strlen(to); ++j)
+    printf("--------------------------------------------------\n");
+    for (int i = 0; i <= flen; ++i)
+    {
+        for (int j = 0; j <= tlen; ++j)
             printf("%d\t", V[i][j]);
         printf("\n");
-#endif
-        free(V[i]);
     }
-    free(V);
+    printf("--------------------------------------------------\n");
+#endif
 
+    free_matrix(V, flen + 1);
     free(from);
     free(to);
 }
