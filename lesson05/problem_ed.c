@@ -24,10 +24,12 @@ Problem ED — расстояние редактирования
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 int read_string(char **str)
 {
     int res, size;
+    char spc;
 
     res = scanf("%d", &size);
     if (res != 1)
@@ -40,11 +42,22 @@ int read_string(char **str)
         return 1;
     }
 
-    res = scanf("%s", *str);
-    if (res != 1)
+    res = scanf("%c", &spc);
+    if (res != 1 || !isspace(spc))
     {
+        fprintf(stderr, "Error in input\n");
         free(*str);
         return 1;
+    }
+
+    for (int i = 0; i < size; ++i)
+    {
+        res = scanf("%c", &((*str)[i]));
+        if (res != 1)
+        {
+            free(*str);
+            return 1;
+        }
     }
 
     return 0;
@@ -133,8 +146,8 @@ void fill_matrix(int costs[3], const char *from, const char *to, int **V)
                 continue;
             }
 
-            add = V[i - 1][j] + costs[0];
-            del = V[i][j - 1] + costs[1];
+            add = V[i][j - 1] + costs[0];
+            del = V[i - 1][j] + costs[1];
             change = V[i - 1][j - 1];
             
             if (from[i - 1] != to[j - 1])
