@@ -59,62 +59,61 @@ OUT D       output 111
 #include <stdio.h>
 #include <stdlib.h>
 
-enum cmd {MOVI, ADD, SUB, MUL, DIV, IN, OUT, ERROR};
+enum cmd_t {MOVI, ADD, SUB, MUL, DIV, IN, OUT, ERROR};
 
 union param_t
 {
-    enum reg {A, B, C, D} registers[2];
+    enum reg_t {A, B, C, D} r[2];
     unsigned char imm;
 };
 
 struct mnemo_t
 {
-    enum cmd command;
-    union param_t parameter;
+    enum cmd_t cmd;
+    union param_t par;
 };
 
 struct mnemo_t decode(unsigned char code)
 {
     struct mnemo_t res;
     unsigned char ncmd = (code & 0xf0) >> 4;
-    unsigned char np1 = (code & 0xc) >> 2;
-    unsigned char np2 = code & 0x3;
+    enum reg_t r1 = (code & 0xc) >> 2,
+        r2 = code & 0x3;
 
-    // MOVI
     if (!(code & 0x80))
     {
-        res.command = MOVI;
-        res.parameter.imm = code;
+        res.cmd = MOVI;
+        res.par.imm = code;
         return res;
     }
 
-    res.parameter.registers[0] = np1;
-    res.parameter.registers[1] = np2;
+    res.par.r[0] = r1;
+    res.par.r[1] = r2;
     
     switch (ncmd)
     {
         case 0x8:
-            res.command = ADD;
+            res.cmd = ADD;
             break;
         case 0x9:
-            res.command = SUB;
+            res.cmd = SUB;
             break;
         case 0xa:
-            res.command = MUL;
+            res.cmd = MUL;
             break;
         case 0xb:
-            res.command = DIV;
+            res.cmd = DIV;
             break;
         case 0xc:
-            if (np1 == 1)
-                res.command = OUT;
-            else if (np1 == 0)
-                res.command = IN;
+            if (r1 == 1)
+                res.cmd = OUT;
+            else if (r1 == 0)
+                res.cmd = IN;
             else
-                res.command = ERROR;
+                res.cmd = ERROR;
         break;
         default:
-            res.command = ERROR;
+            res.cmd = ERROR;
             break;
     }
 
@@ -125,30 +124,28 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
 {
     int res;
     unsigned tmp_in;
+    enum reg_t r1 = cmd->par.r[0],
+        r2 = cmd->par.r[1];
 
-    switch (cmd->command)
+    switch (cmd->cmd)
     {
         case MOVI:
-            machine[D] = cmd->parameter.imm;
+            machine[D] = cmd->par.imm;
             break;
         case ADD:
-            machine[cmd->parameter.registers[0]] +=
-                machine[cmd->parameter.registers[1]];
+            machine[r1] += machine[r2];
             break;
         case SUB:
-            machine[cmd->parameter.registers[0]] -=
-                machine[cmd->parameter.registers[1]];
+            machine[r1] -= machine[r2];
             break;
         case MUL:
-            machine[cmd->parameter.registers[0]] *=
-                machine[cmd->parameter.registers[1]];
+            machine[r1] *= machine[r2];
             break;
         case DIV:
-            machine[cmd->parameter.registers[0]] /=
-                machine[cmd->parameter.registers[1]];
+            machine[r1] /= machine[r2];
             break;
         case OUT:
-            printf("%d\n", machine[cmd->parameter.registers[1]]);
+            printf("%d\n", machine[r2]);
             break;
         case IN:
             res = scanf("%d", &tmp_in);
@@ -157,7 +154,7 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
                 fprintf(stderr, "Error in IN input\n");
                 return 1;
             }
-            machine[cmd->parameter.registers[1]] = (unsigned char)tmp_in;
+            machine[r2] = (unsigned char)tmp_in;
             break;
         default:
             break;
@@ -182,14 +179,14 @@ int main(int argc, char *argv[])
     if ((f = fopen(argv[1], "r")) == NULL)
     {
         fprintf(stderr, "Error opening file %s\n", argv[1]);
-        return 1;
+        abort();
     }
 
     while (fscanf(f,"%x", &code) == 1)
     {
         cmd = decode(code);
 
-        if (cmd.command == ERROR)
+        if (cmd.cmd == ERROR)
         {
             fprintf(stderr, "Error decoding program\n");
             fclose(f);
