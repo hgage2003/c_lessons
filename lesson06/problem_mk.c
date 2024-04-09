@@ -3,23 +3,26 @@ Problem MK — эмулятор
 Регистровый файл состоит из четырёх восьмиразрядных регистров
 
 Register file
-Register	A	B	C	D
+Register            A	B	C	D
 Encoding (binary)	00	01	10	11
+
 Вам задана следующая система команд и таблица мнемоник
 
 Instruction set
-Mnemonic	Encoding (binary)
-MOVI Imm — move constant to D register	0IIIIIII
-ADD R, R — add two registers modulo 256	1000RRRR
-SUB R, R — sub two registers modulo 256	1001RRRR
-MUL R, R — mul two registers modulo 256	1010RRRR
-DIV R, R — div two registers modulo 256	1011RRRR
-IN R — read register R from keyboard	110000RR
-OUT R — write register R to screen	110001RR
-Вам приходит закодированная программа как параметр argv[1] и стандартный ввод на stdin
+
+Mnemonic                                    Encoding (binary)
+MOVI Imm — move constant to D register	    0IIIIIII
+ADD R, R — add two registers modulo 256	    1000RRRR
+SUB R, R — sub two registers modulo 256	    1001RRRR
+MUL R, R — mul two registers modulo 256	    1010RRRR
+DIV R, R — div two registers modulo 256	    1011RRRR
+IN R — read register R from keyboard	    110000RR
+OUT R — write register R to screen	        110001RR
+
+Вам приходит имя файла закодированной программы как параметр argv[1] и стандартный ввод
+на stdin
 
 Вам необходимо симулировать работу программы и вывести всё что она выводит на stdout
-
 
 Пример 1
 
@@ -27,32 +30,24 @@ OUT R — write register R to screen	110001RR
 
 Вход:104 64
 
-Выход:112 216 63 111
+Выход:112
+216
+63
+111
 
 Пояснение: программа состоит (если записать её символически) из следующих команд
 
 MOVI 112    D = 112
-
 OUT D       output 112
-
 IN B        read 104
-
 ADD B, D    B = 104 + 112
-
 MOVI 39     D = 39
-
 OUT B       output 216
-
 ADD D, B    D = 216 + 39
-
 IN B        read 64
-
 ADD B, D    B = (216 + 39 + 64) mod 256
-
 MOVI 111    D = 111
-
 OUT B       output 63
-
 OUT D       output 111
 */
 
