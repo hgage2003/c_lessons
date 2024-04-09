@@ -73,100 +73,52 @@ struct mnemo_t
     union param_t parameter;
 };
 
-struct plist_t
+struct mnemo_t decode(unsigned char code)
 {
-    struct plist_t *next;
-    struct mnemo_t mnemo;
-};
-
-struct plist_t *decode(unsigned char code)
-{
-    struct plist_t *res;
-    int ncmd = (code & 0xf0) >> 4;
-    int np1 = (code & 0xc) >> 2;
-    int np2 = code & 0x3;
-
-    res = calloc(1, sizeof(struct plist_t));
-    if (!res)
-    {
-        fprintf(stderr, "Error in calloc\n");
-        return NULL;
-    }
+    struct mnemo_t res;
+    unsigned char ncmd = (code & 0xf0) >> 4;
+    unsigned char np1 = (code & 0xc) >> 2;
+    unsigned char np2 = code & 0x3;
 
     // MOVI
     if (!(code & 0x80))
     {
-        res->mnemo.command = MOVI;
-        res->mnemo.parameter.imm = code;
+        res.command = MOVI;
+        res.parameter.imm = code;
         return res;
     }
 
-    res->mnemo.parameter.registers[0] = np1;
-    res->mnemo.parameter.registers[1] = np2;
+    res.parameter.registers[0] = np1;
+    res.parameter.registers[1] = np2;
     
     switch (ncmd)
     {
         case 0x8:
-            res->mnemo.command = ADD;
+            res.command = ADD;
             break;
         case 0x9:
-            res->mnemo.command = SUB;
+            res.command = SUB;
             break;
         case 0xa:
-            res->mnemo.command = MUL;
+            res.command = MUL;
             break;
         case 0xb:
-            res->mnemo.command = DIV;
+            res.command = DIV;
             break;
         case 0xc:
             if (np1 == 1)
-                res->mnemo.command = OUT;
+                res.command = OUT;
             else if (np1 == 0)
-                res->mnemo.command = IN;
+                res.command = IN;
             else
-                res->mnemo.command = ERROR;
+                res.command = ERROR;
         break;
         default:
-            res->mnemo.command = ERROR;
+            res.command = ERROR;
             break;
     }
 
     return res;
-}
-
-int load_program(char *fname, struct plist_t **program)
-{
-    FILE *f;
-    unsigned code;
-    struct plist_t *last = *program;
-
-    if ((f = fopen(fname, "r")) == NULL)
-    {
-        fprintf(stderr, "Error opening file %s\n", fname);
-        return 1;
-    }
-
-    while (fscanf(f,"%x", &code) == 1)
-    {
-        struct plist_t *node = decode(code);
-
-        if (!node)
-        {
-            fprintf(stderr, "Error decoding program\n");
-            fclose(f);
-            return 1;
-        }
-        
-        if (!(*program))
-            *program = node;
-        else
-            last->next = node;
-
-        last = node;
-    }
-    fclose(f);
-
-    return 0;
 }
 
 int execute(const struct mnemo_t *cmd, unsigned char machine[4])
@@ -214,32 +166,12 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
     return 0;
 }
 
-int run(const struct plist_t *program)
-{
-    unsigned char machine[4] = {0};
-    while (program)
-    {
-        const struct plist_t *temp = program->next;
-        if (execute(&program->mnemo, machine))
-            return 1;
-        program = temp;
-    }
-    return 0;
-}
-
-void free_program(struct plist_t *program)
-{
-    while (program)
-    {
-        struct plist_t *temp = program->next;
-        free(program);
-        program = temp;
-    }
-}
-
 int main(int argc, char *argv[])
 {
-    struct plist_t *program = NULL;
+    FILE *f;
+    unsigned code;
+    struct mnemo_t cmd;
+    unsigned char machine[4] = {0};
 
     if (argc < 2)
     {
@@ -247,13 +179,24 @@ int main(int argc, char *argv[])
         abort();
     }
 
-    if (load_program(argv[1], &program))
+    if ((f = fopen(argv[1], "r")) == NULL)
     {
-        fprintf(stderr, "Error loading program [%s]", argv[1]);
-        abort();
+        fprintf(stderr, "Error opening file %s\n", argv[1]);
+        return 1;
     }
 
-    run(program);
+    while (fscanf(f,"%x", &code) == 1)
+    {
+        cmd = decode(code);
 
-    free_program(program);
+        if (cmd.command == ERROR)
+        {
+            fprintf(stderr, "Error decoding program\n");
+            fclose(f);
+            abort();
+        }
+        
+        execute(&cmd, machine);
+    }
+    fclose(f);
 }
