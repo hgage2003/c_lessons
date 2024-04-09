@@ -157,6 +157,7 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
             machine[r2] = (unsigned char)tmp_in;
             break;
         default:
+            return 1;
             break;
     }
 
@@ -193,7 +194,12 @@ int main(int argc, char *argv[])
             abort();
         }
         
-        execute(&cmd, machine);
+        if (execute(&cmd, machine))
+        {
+            fprintf(stderr, "Error executing program\n");
+            fclose(f);
+            abort();
+        }
     }
     fclose(f);
 }
