@@ -106,7 +106,7 @@ struct mnemo_t decode(unsigned char code)
                 res.cmd = IN;
             else
                 res.cmd = ERROR;
-        break;
+            break;
         default:
             res.cmd = ERROR;
             break;
