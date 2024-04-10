@@ -137,6 +137,11 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
             machine[r1] *= machine[r2];
             break;
         case DIV:
+            if (!machine[r2])
+            {
+                fprintf(stderr, "Error: divizion by zero\n");
+                return 1;
+            }
             machine[r1] /= machine[r2];
             break;
         case OUT:
