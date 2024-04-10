@@ -62,50 +62,50 @@ unsigned char decode(char *buffer, const regex_t *regex)
 {
     int res;
     regmatch_t matches[4];
-    char cmd[16] = {0}, p1[16] = {0}, p2[16] = {0};
-    unsigned char chp1 = 0, chp2 = 0;
+    char cmd_s[16] = {0}, p1_s[16] = {0}, p2_s[16] = {0};
+    unsigned char r1 = 0, r2 = 0;
     
-    if (buffer[0] == 10)
+    if (buffer[0] == '\n')
         return 0;
         
     res = regexec(regex, buffer, 4, matches, 0);
     if (res)
         return 0xff;
 
-    memcpy(cmd, buffer + matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
-    memcpy(p1, buffer + matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
+    memcpy(cmd_s, buffer + matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
+    memcpy(p1_s, buffer + matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
 
     if (matches[3].rm_eo > 0)
-        memcpy(p2, buffer + matches[3].rm_so, matches[3].rm_eo - matches[3].rm_so);
+        memcpy(p2_s, buffer + matches[3].rm_so, matches[3].rm_eo - matches[3].rm_so);
 
-    if (!strcmp("MOVI", cmd))
+    if (!strcmp("MOVI", cmd_s))
     {
-        long i = strtol(p1, NULL, 10);
+        long i = strtol(p1_s, NULL, 10);
         return (unsigned char)i;
     }
 
-    chp1 = p1[0] - 'A';
+    r1 = p1_s[0] - 'A';
     
-    if (p2[0])
-        chp2 = p2[0] - 'A';
+    if (p2_s[0])
+        r2 = p2_s[0] - 'A';
 
-    if (!strcmp("ADD", cmd))
-        return 0x80 | (chp1 << 2) | chp2;
+    if (!strcmp("ADD", cmd_s))
+        return 0x80 | (r1 << 2) | r2;
 
-    if (!strcmp("SUB", cmd))
-        return 0x90 | (chp1 << 2) | chp2;
+    if (!strcmp("SUB", cmd_s))
+        return 0x90 | (r1 << 2) | r2;
     
-    if (!strcmp("MUL", cmd))
-        return 0xa0 | (chp1 << 2) | chp2;
+    if (!strcmp("MUL", cmd_s))
+        return 0xa0 | (r1 << 2) | r2;
 
-    if (!strcmp("DIV", cmd))
-        return 0xb0 | (chp1 << 2) | chp2;
+    if (!strcmp("DIV", cmd_s))
+        return 0xb0 | (r1 << 2) | r2;
 
-    if (!strcmp("IN", cmd))
-        return 0xc0 | chp1;
+    if (!strcmp("IN", cmd_s))
+        return 0xc0 | r1;
 
-    if (!strcmp("OUT", cmd))
-        return 0xc4 | chp1;
+    if (!strcmp("OUT", cmd_s))
+        return 0xc4 | r1;
 
     return 0xff;
 }

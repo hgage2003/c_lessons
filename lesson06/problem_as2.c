@@ -51,7 +51,7 @@ ERROR
 #include <string.h>
 #include <assert.h>
 
-void reg_name(char* str, int code)
+void reg_name(char* str, unsigned char code)
 {
     char reg = 0;
     assert(code >= 0 && code < 4);
@@ -78,58 +78,49 @@ void reg_name(char* str, int code)
     str[1] = 0;
 }
 
-int decode(unsigned code)
+int decode(unsigned char code)
 {
-    char cmd[8] = {0}, param1[8] = {0}, param2[8] = {0};
-    int ncmd = (code & 0xf0) >> 4;
-    int np1 = (code & 0xc) >> 2;
-    int np2 = code & 0x3;
+    char cmd_s[8] = {0}, r1_s[8] = {0}, r2_s[8] = {0};
+    unsigned char ncmd = (code & 0xf0) >> 4,
+        r1 = (code & 0xc) >> 2, r2 = code & 0x3;
 
-    assert(code == (code & 0xff));
-
-    // MOVI
     if (!(code & 0x80))
     {
-        strcpy(cmd, "MOVI");
-        sprintf(param1, "%d", code);
-        ncmd = 0xff;
+        strcpy(cmd_s, "MOVI");
+        printf("%s %d\n", cmd_s, code);
+        return 0;
     }
+
+    reg_name(r1_s, r1);
+    reg_name(r2_s, r2);
 
     switch (ncmd)
     {
         case 0x8:
-            strcpy(cmd, "ADD");
-            reg_name(param1, np1);
-            reg_name(param2, np2);
+            strcpy(cmd_s, "ADD");
             break;
         case 0x9:
-            strcpy(cmd, "SUB");
-            reg_name(param1, np1);
-            reg_name(param2, np2);
+            strcpy(cmd_s, "SUB");
             break;
         case 0xa:
-            strcpy(cmd, "MUL");
-            reg_name(param1, np1);
-            reg_name(param2, np2);
+            strcpy(cmd_s, "MUL");
             break;
         case 0xb:
-            strcpy(cmd, "DIV");
-            reg_name(param1, np1);
-            reg_name(param2, np2);
+            strcpy(cmd_s, "DIV");
             break;
         case 0xc:
-            if (np1)
-                strcpy(cmd, "OUT");
+            if (r1)
+                strcpy(cmd_s, "OUT");
             else
-                strcpy(cmd, "IN");
-            reg_name(param1, np2);
+                strcpy(cmd_s, "IN");
+            r1_s[0] = 0;
         break;
     }
 
-    if (param2[0])
-        printf("%s %s, %s\n", cmd, param1, param2);
-    else if (param1[0])
-        printf("%s %s\n", cmd, param1);
+    if (r1_s[0])
+        printf("%s %s, %s\n", cmd_s, r1_s, r2_s);
+    else if (r2_s[0])
+        printf("%s %s\n", cmd_s, r2_s);
     else
     {
         printf("ERROR\n");
@@ -140,10 +131,10 @@ int decode(unsigned code)
 
 int main()
 {
-    unsigned code;
+    unsigned int code;
     while (scanf("%x", &code) == 1)
     {
-        if (decode(code))
+        if (decode((unsigned char)code))
             break;
     }
 }
