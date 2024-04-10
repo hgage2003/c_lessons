@@ -55,87 +55,85 @@ OUT D       output 111
 #include <stdio.h>
 #include <stdlib.h>
 
-enum cmd_t {MOVI, ADD, SUB, MUL, DIV, IN, OUT, ERROR};
+enum cmd_t {MOVI = 0, ADD = 8, SUB = 9, MUL = 10, DIV = 11, IN, OUT, CLAST, CERROR};
+enum reg_t {A = 0, B, C, D, RLAST};
 
-union param_t
+union operand_t
 {
-    enum reg_t {A, B, C, D} r[2];
+    struct {enum reg_t rd, rs;} ops; 
+    enum reg_t rop;
     unsigned char imm;
 };
 
-struct mnemo_t
+struct instr_t
 {
-    enum cmd_t cmd;
-    union param_t par;
+    enum cmd_t opcode;
+    union operand_t opnd;
 };
 
-struct mnemo_t decode(unsigned char code)
+struct instr_t decode(unsigned char code)
 {
-    struct mnemo_t res;
+    struct instr_t res;
     unsigned char ncmd = (code & 0xf0) >> 4;
     enum reg_t r1 = (code & 0xc) >> 2,
         r2 = code & 0x3;
 
     if (!(code & 0x80))
     {
-        res.cmd = MOVI;
-        res.par.imm = code;
+        res.opcode = MOVI;
+        res.opnd.imm = code;
         return res;
     }
 
-    res.par.r[0] = r1;
-    res.par.r[1] = r2;
-    
-    switch (ncmd)
+    if ((code >> 6) & 0x1 == 1)
     {
-        case 0x8:
-            res.cmd = ADD;
-            break;
-        case 0x9:
-            res.cmd = SUB;
-            break;
-        case 0xa:
-            res.cmd = MUL;
-            break;
-        case 0xb:
-            res.cmd = DIV;
-            break;
-        case 0xc:
-            if (r1 == 1)
-                res.cmd = OUT;
-            else if (r1 == 0)
-                res.cmd = IN;
-            else
-                res.cmd = ERROR;
-            break;
-        default:
-            res.cmd = ERROR;
-            break;
+        if ((code >> 2) == 0x30)
+            res.opcode = IN;
+        else if ((code >> 2) == 0x31)
+            res.opcode = OUT;
+        else
+        {
+            fprintf(stderr, "ERROR: bad inout\n");
+            res.opcode = CERROR;
+        }
+        res.opnd.rop = r2;
+        return res;
+    }
+
+    res.opnd.ops.rd = r1;
+    res.opnd.ops.rs = r2;
+    
+    if (ncmd >= ADD && ncmd <= DIV)
+        res.opcode = ncmd;
+    else
+    {
+        fprintf(stderr, "ERROR: bad opcode\n");
+            res.opcode = CERROR;
     }
 
     return res;
 }
 
-int execute(const struct mnemo_t *cmd, unsigned char machine[4])
+int execute(const struct instr_t *cmd, unsigned char machine[4])
 {
     int res;
     unsigned tmp_in;
-    enum reg_t r1 = cmd->par.r[0],
-        r2 = cmd->par.r[1];
+    enum reg_t rd = cmd->opnd.ops.rd,
+        r2 = cmd->opnd.ops.rs, rop = cmd->opnd.rop;
 
-    switch (cmd->cmd)
+    switch (cmd->opcode)
     {
         case MOVI:
-            machine[D] = cmd->par.imm;
+            machine[D] = cmd->opnd.imm;
             break;
         case ADD:
-            machine[r1] += machine[r2];
+            machine[rd] += machine[r2];
             break;
         case SUB:
-            machine[r1] -= machine[r2];
+            machine[rd] -= machine[r2];
             break;
         case MUL:
-            machine[r1] *= machine[r2];
+            machine[rd] *= machine[r2];
             break;
         case DIV:
             if (!machine[r2])
@@ -143,10 +141,10 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
                 fprintf(stderr, "ERROR: divizion by zero\n");
                 return 1;
             }
-            machine[r1] /= machine[r2];
+            machine[rd] /= machine[r2];
             break;
         case OUT:
-            printf("%d\n", machine[r2]);
+            printf("%d\n", machine[rop]);
             break;
         case IN:
             res = scanf("%d", &tmp_in);
@@ -155,7 +153,7 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
                 fprintf(stderr, "ERROR: bad IN input\n");
                 return 1;
             }
-            machine[r2] = (unsigned char)tmp_in;
+            machine[rop] = (unsigned char)tmp_in;
             break;
         default:
             return 1;
@@ -169,9 +167,10 @@ int main(int argc, char *argv[])
 {
     FILE *f;
     unsigned code;
-    struct mnemo_t cmd;
+    struct instr_t cmd;
     unsigned char machine[4] = {0};
 
+#if 1
     if (argc < 2)
     {
         fprintf(stderr, "ERROR: no program at argv[1]");
@@ -183,12 +182,15 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERROR: can not open file %s\n", argv[1]);
         abort();
     }
+#elif
+    f = fopen("./prog1.enc", "r");
+#endif
 
     while (fscanf(f,"%x", &code) == 1)
     {
         cmd = decode(code);
 
-        if (cmd.cmd == ERROR)
+        if (cmd.opcode == CERROR)
         {
             fprintf(stderr, "ERROR: can not decode program\n");
             fclose(f);
