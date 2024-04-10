@@ -139,7 +139,7 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
         case DIV:
             if (!machine[r2])
             {
-                fprintf(stderr, "Error: divizion by zero\n");
+                fprintf(stderr, "ERROR: divizion by zero\n");
                 return 1;
             }
             machine[r1] /= machine[r2];
@@ -151,7 +151,7 @@ int execute(const struct mnemo_t *cmd, unsigned char machine[4])
             res = scanf("%d", &tmp_in);
             if (res != 1)
             {
-                fprintf(stderr, "Error in IN input\n");
+                fprintf(stderr, "ERROR: bad IN input\n");
                 return 1;
             }
             machine[r2] = (unsigned char)tmp_in;
@@ -173,13 +173,13 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        fprintf(stderr, "No program at argv[1]");
+        fprintf(stderr, "ERROR: no program at argv[1]");
         abort();
     }
 
     if ((f = fopen(argv[1], "r")) == NULL)
     {
-        fprintf(stderr, "Error opening file %s\n", argv[1]);
+        fprintf(stderr, "ERROR: can not open file %s\n", argv[1]);
         abort();
     }
 
@@ -189,14 +189,14 @@ int main(int argc, char *argv[])
 
         if (cmd.cmd == ERROR)
         {
-            fprintf(stderr, "Error decoding program\n");
+            fprintf(stderr, "ERROR: can not decode program\n");
             fclose(f);
             abort();
         }
         
         if (execute(&cmd, machine))
         {
-            fprintf(stderr, "Error executing program\n");
+            fprintf(stderr, "ERROR: can not execute program\n");
             fclose(f);
             abort();
         }
