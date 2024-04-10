@@ -3,12 +3,12 @@ Problem AS — кодировщик
 Регистровый файл состоит из четырёх восьмиразрядных регистров
 
 Register file
-Register	A	B	C	D
+Register	        A	B	C	D
 Encoding (binary)	00	01	10	11
 Вам задана следующая система команд и таблица мнемоник
 
 Instruction set
-Mnemonic	Encoding (binary)
+Mnemonic	                            Encoding (binary)
 MOVI Imm — move constant to D register	0IIIIIII
 ADD R, R — add two registers modulo 256	1000RRRR
 SUB R, R — sub two registers modulo 256	1001RRRR
@@ -24,13 +24,9 @@ OUT R — write register R to screen      110001RR
 Пример 1
 
 Вход:
-
 MOVI 112
-
 OUT D
-
 IN B
-
 ADD B, D
 
 Выход: 0x70 0xc7 0xc1 0x87
@@ -39,13 +35,9 @@ ADD B, D
 Пример 2
 
 Вход:
-
 MOVI 112
-
 OUT X
-
 IN B
-
 ADD B, D
 
 Выход: 0x70 ERROR
