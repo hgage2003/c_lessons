@@ -9,20 +9,20 @@ Problem AGF — распознавание простой функции
   .globl  foo
   .type foo, @function
 foo:
-  mov eax, edi
-  imul  eax, edi
-  imul  eax, edi
-  test  eax, eax
-  js  .L4
-  ret
+  mov eax, edi          // 
+  imul  eax, edi        //           
+  imul  eax, edi        // z = x * x * x;
+  test  eax, eax        //  
+  js  .L4               // if (z < 0) goto .L4
+  ret                   // else return z;
 .L4:
-  imul  esi, esi
-  add edi, edi
-  mov edx, 17
-  sub edx, edi
-  sub edx, esi
-  add eax, edx
-  ret
+  imul  esi, esi        // 
+  add edi, edi          // 
+  mov edx, 17           //
+  sub edx, edi          // 
+  sub edx, esi          // 
+  add eax, edx          // 
+  ret                   // return z + 17 - x * 2 - y * y;
 Вам нужно догадаться что это за функция и написать её на языке C.
 
 Ответом должна быть только foo, функцию main писать не надо.
@@ -32,17 +32,12 @@ foo:
 
 int foo(int x, int y)
 {
-    int a = x * x * x;
-    int d = 17;
+    int z = x * x * x;
+ 
+    if (z < 0)
+        z += 17 - x * 2 - y * y;
 
-    if (a > 0)
-        return a;
-
-    y *= y;
-    x += x;
-    d -= (x + y);
-    a += d;
-    return a;
+    return z;
 }
 
 #ifdef NDEBUG
