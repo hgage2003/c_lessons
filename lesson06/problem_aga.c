@@ -27,7 +27,6 @@ foo:
 
 Ответом должна быть только foo, функцию main писать не надо.
 */
-#include <stdio.h>
 
 int foo(const int *a, int size)
 {
@@ -53,6 +52,8 @@ int foo(const int *a, int size)
     return res;
 }
 
+#ifdef NDEBUG
+#include <stdio.h>
 
 int main()
 {
@@ -62,3 +63,4 @@ int main()
 
     printf("%d\n", x);
 }
+#endif
