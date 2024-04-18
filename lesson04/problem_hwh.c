@@ -23,102 +23,123 @@ abc bca
 #include <string.h>
 #include <assert.h>
 
-#define R 32
-#define Q 0x1000
+#define Q 4096 // мощность
+#define P 4099 // P - простое число, большее Q
+#define A 99   // коэффициент
 
-// подсчитать хеш строки от start до fin
-int get_hash(const char *start, const char *fin)
+struct dictnode
 {
-    int hash = 0, acc = 1;
-    assert(fin > start);
+    char *word;
+    int count;      // количество повторов в тексте
+    struct dictnode* next;
+};
 
-    while (fin != start)
-    {
-        --fin;
-        hash = (hash + (*fin) * acc) % Q;
-        acc = (acc * R) % Q;
-    }
+// подсчитать хеш строки
+int hash(const char *str)
+{
+    unsigned hash = 0, l = strlen(str);
+
+    for (unsigned i = 0; i < l; ++i)
+        hash = ((hash * A) + str[i]) % P;
     
-    return hash;
+    return hash % Q;
 }
 
-// обновить хеш current, удалив из него cprev и добавив в него cnext
-// здесь n это pow_mod(R, right - 1, Q)
-// возвращает новый хеш
-int update_hash(int current, int n, char cprev, char cnext)
+int dict_find(struct dictnode *dict[Q], const char* word)
 {
-    current = (Q + current - (cprev * n) % Q) % Q;
-    current = (current * R + cnext) % Q;
+    int h = hash(word);
+    struct dictnode *it;
 
-    return current;
-}
+    if (!(it = dict[h]))
+        return 0;
 
-// raise n to power k modulo m
-unsigned long long pow_mod(unsigned n, unsigned k, unsigned m)
-{
-    unsigned long long acc, prod;
-    assert(m > 1);
-    
-    if (!k)
-        return 1;
-    
-    acc = n % m;
-    prod = 1;
-    for (; k > 0; )
+    while (it)
     {
-        if (k % 2)
-            prod = (prod * acc) % m;
-        acc = (acc * acc) % m;
-        k /= 2;
+        if (!strcmp(it->word, word))
+            return it->count;
+
+        it = it->next;
     }
 
-    return prod;
+    return 0;
 }
 
-int is_equal(const char *l, const char *r, size_t len)
+// копирует строку в словарь
+int dict_add(struct dictnode *dict[Q], const char* word)
 {
-    for (int i = 0; i < len; ++i)
-        if (l[i] != r[i])
-            return 0;
+    int h = hash(word), l = strlen(word);
+    struct dictnode *it, *node;
 
-    return 1;
-}
+    if (!l)
+        return 0;
 
-// возвращает номер позиции на которой needle расположена внутри haystack
-// или -1 если ничего не найдено
-int rabin_karp(const char *needle, const char *haystack) 
-{
-    unsigned n, target, cur, left = 0, right = strlen(needle);
-    int res = -1;
-    
-    target = get_hash(needle, needle + right);
-    cur = get_hash(haystack, haystack + right);
-    n = pow_mod(R, right - 1, Q);
-
-    // сравниваем до haystack[right] не включая его
-    while (haystack[right - 1])
-    {        
-        if (target == cur)
-            if (is_equal(needle, &haystack[left], strlen(needle)))
+    // ищем слово в словаре
+    if ((it = dict[h]))
+        for( ; ; )
+        {
+            if (!strcmp(it->word, word))
             {
-                res = left;
-                break;
+                ++it->count;
+                return 0;
             }
+            if (it->next)
+                it = it->next;
+            else
+                break;
+        }
+    // слова нет, it показывает, после какого нода его нужно вставить
 
-        cur = update_hash(cur, n, haystack[left], haystack[right]);
-        left += 1;
-        right += 1;
+    node = calloc(1, sizeof(struct dictnode));
+    if (!node)
+    {
+        fprintf(stderr, "Error in calloc\n");
+        return 1;
     }
     
-    return res;
+    node->count = 1;
+    node->word = calloc(l + 1, sizeof(char));
+    if (!node->word)
+    {
+        free(node);
+        fprintf(stderr, "Error in calloc\n");
+        return 1;
+    }
+    strcpy(node->word, word);
+
+    if (!it)
+    {
+        dict[h] = node;
+        return 0;
+    }
+
+    it->next = node;
+    return 0;
 }
 
-int read_input(char **hay)
+void dict_free(struct dictnode **dict)
 {
-    int ndl_count = 0, res;
-    long unsigned lusz, tmp2;
-    char temp[16] = {0};
+    struct dictnode *del;
+    for (int i = 0; i < Q; ++i)
+    {
+        del = dict[i];
+        while (del)
+        {
+            struct dictnode *tmp = del->next;
+            free(del->word);
+            free(del);
+            del = tmp;
+        }
+    }
 
+    free(dict);
+}
+
+int read_dict(struct dictnode **dict)
+{
+    int res, wordsz = 0, ndl_count;
+    long unsigned srtsz;
+    char word[100] = {0};
+    
     // количество ответов (и вопросов) 
     res = scanf("%d\n", &ndl_count);
     if (res != 1)
@@ -127,69 +148,80 @@ int read_input(char **hay)
         abort();
     }
 
-    // текст для поиска
-    res = scanf("%lu\n", &lusz);
+    // словарь
+    res = scanf("%lu\n", &srtsz);
     if (res != 1)
     {
         fprintf(stderr, "Error in input");
         abort();
     }
 
-    ++lusz; // завершающий 0
-    *hay = calloc(lusz, sizeof(char));
-    if (!(*hay))
+    for (unsigned long i = 0; i < srtsz; ++i)
     {
-        fprintf(stderr, "Calloc error");
-        abort();
-    }
+        char ch;
 
-    if (!fgets(*hay, lusz, stdin))
-    {
-        fprintf(stderr, "Error in input");
-        free(*hay);
-        abort();
+        res = scanf("%c", &ch);
+        if (res != 1)
+        {
+            fprintf(stderr, "Error in input");
+            abort();
+        }
+
+        if (ch ==' ')
+        {
+            word[wordsz] = 0;
+            wordsz = 0;
+            dict_add(dict, word);
+        }
+        else
+            word[wordsz++] = ch;
     }
-    
-    // поисковые запросы
-    res = scanf("%lu\n", &lusz);
-    if (res != 1)
-    {
-        fprintf(stderr, "Error in input");
-        free(*hay);
-        abort();
-    }
+    word[wordsz] = 0;
+    dict_add(dict, word);
 
     return ndl_count;
 }
 
-void main()
+int main()
 {
-    char *hay = NULL;
-    int ndl_size = read_input(&hay);
+    struct dictnode** dict;
+    int ans_cnt, ans_sz, res;
 
-    for (int i = 0; i < ndl_size; ++i)
+    dict = calloc(Q, sizeof(struct dictnode*));
+    if (!dict)
     {
-        int count = 0, start = 0, found, ndl_len;
-        char needle[1024];
+        fprintf(stderr, "Error in calloc\n");
+        abort();
+    }
+    
+    ans_cnt = read_dict(dict);
 
-        if (1 != scanf("%s", needle))
+    // поисковые запросы
+    res = scanf("%d\n", &ans_sz);
+    if (res != 1)
+    {
+        fprintf(stderr, "Error in input");
+        dict_free(dict);
+        abort();
+    }
+
+    for (int i = 0; i < ans_cnt; ++i)
+    {
+        char word[100];
+        int cnt;
+
+        res = scanf("%s", word);
+        if (res != 1)
         {
-            fprintf(stderr, "Input error");
-            free(hay);
+            fprintf(stderr, "Error in input");
+            dict_free(dict);
             abort();
         }
 
-        ndl_len = strlen(needle);
-
-        while((found = rabin_karp(needle, &hay[start])) != -1)
-        {
-            ++count;
-            start += (found + ndl_len);
-        }
-
-        printf("%d ", count);
+        cnt = dict_find(dict, word);
+        printf("%d ", cnt);
     }
 
     printf("\n");
-    free(hay);
+    dict_free(dict);
 }
